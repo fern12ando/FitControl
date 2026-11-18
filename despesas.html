@@ -1,0 +1,218 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Despesas — FitControl</title>
+  <link rel="stylesheet" href="global.css" />
+  <link rel="stylesheet" href="layout.css" />
+  <link rel="stylesheet" href="components.css" />
+  <link rel="stylesheet" href="responsive.css" />
+</head>
+<body>
+  <div class="app-wrapper">
+    <aside class="sidebar"></aside>
+
+    <div class="main-wrapper">
+      <header class="topbar"></header>
+
+      <main class="main-content">
+        <div class="page-header">
+          <div class="page-header-row">
+            <div>
+              <h1 class="page-title">Gestão de Despesas</h1>
+              <p class="page-subtitle">Controle de contas a pagar, centros de custo e custos fixos da academia</p>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="openModal('new-expense-modal')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Lançar Despesa
+            </button>
+          </div>
+        </div>
+
+        <!-- KPIs de Despesas -->
+        <div class="stats-grid">
+          <div class="stat-card stat-red">
+            <div class="stat-content">
+              <span class="stat-label">Despesas Pagas</span>
+              <span class="stat-value text-danger" id="kpi-expenses-paid">R$ 0,00</span>
+              <span class="stat-helper">Liquidadas no período</span>
+            </div>
+            <div class="stat-icon stat-icon-red">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/></svg>
+            </div>
+          </div>
+
+          <div class="stat-card stat-yellow">
+            <div class="stat-content">
+              <span class="stat-label">Contas a Pagar (Pendentes)</span>
+              <span class="stat-value text-warning" id="kpi-expenses-pending">R$ 0,00</span>
+              <span class="stat-helper">Aguardando vencimento</span>
+            </div>
+            <div class="stat-icon stat-icon-yellow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+          </div>
+
+          <div class="stat-card stat-purple">
+            <div class="stat-content">
+              <span class="stat-label">Maior Centro de Custo</span>
+              <span class="stat-value" id="kpi-expenses-top-cat" style="font-size: 1.25rem;">-</span>
+              <span class="stat-helper">Categoria predominante</span>
+            </div>
+            <div class="stat-icon stat-icon-purple">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Toolbar de Filtros -->
+        <div class="card toolbar-card">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" id="expense-search-input" class="form-input" placeholder="Buscar por descrição ou fornecedor..." />
+          </div>
+
+          <div class="filter-actions">
+            <select id="expense-category-filter" class="form-select" style="min-width: 170px;">
+              <option value="TODAS">Todos os Centros de Custo</option>
+              <option value="ALUGUEL">Aluguel</option>
+              <option value="ENERGIA">Energia Elétrica</option>
+              <option value="AGUA">Água</option>
+              <option value="INTERNET">Internet</option>
+              <option value="FUNCIONARIOS">Salários / Equipe</option>
+              <option value="MANUTENCAO">Manutenção</option>
+              <option value="MARKETING">Marketing</option>
+              <option value="EQUIPAMENTOS">Equipamentos</option>
+              <option value="OUTRAS">Outras Despesas</option>
+            </select>
+
+            <select id="expense-status-filter" class="form-select" style="min-width: 130px;">
+              <option value="TODOS">Todos os Status</option>
+              <option value="PAGA">Pagas</option>
+              <option value="PENDENTE">Pendentes</option>
+            </select>
+
+            <span class="badge badge-purple" id="expenses-count-badge">0 despesa(s)</span>
+          </div>
+        </div>
+
+        <!-- Tabela de Despesas -->
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Descrição / Fornecedor</th>
+                <th>Centro de Custo</th>
+                <th>Vencimento</th>
+                <th>Forma de Pgto</th>
+                <th>Valor</th>
+                <th>Status</th>
+                <th class="text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="expenses-table-body">
+              <!-- Renderizado via expenses.js -->
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Modal: Nova Despesa -->
+  <div id="new-expense-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Lançar Despesa Operacional</h3>
+        <button class="modal-close-btn" onclick="closeModal('new-expense-modal')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <form id="new-expense-form" onsubmit="handleCreateExpense(event)">
+        <div class="modal-body">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Descrição da Despesa <span class="required">*</span></label>
+            <input type="text" id="expense-title" class="form-input" required placeholder="Ex: Conta de Energia Elétrica do Farol" />
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Centro de Custo <span class="required">*</span></label>
+              <select id="expense-category" class="form-select" required>
+                <option value="ALUGUEL">Aluguel</option>
+                <option value="ENERGIA">Energia Elétrica</option>
+                <option value="AGUA">Água</option>
+                <option value="INTERNET">Internet</option>
+                <option value="FUNCIONARIOS">Salários / Equipe</option>
+                <option value="MANUTENCAO">Manutenção</option>
+                <option value="MARKETING">Marketing</option>
+                <option value="EQUIPAMENTOS">Equipamentos</option>
+                <option value="OUTRAS" selected>Outras Despesas</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Valor (R$) <span class="required">*</span></label>
+              <input type="number" id="expense-amount" class="form-input" required step="0.50" placeholder="0.00" />
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Data de Vencimento <span class="required">*</span></label>
+              <input type="date" id="expense-due-date" class="form-input" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Status Inicial</label>
+              <select id="expense-status" class="form-select">
+                <option value="PENDENTE">Pendente</option>
+                <option value="PAGA">Paga (Liquidada)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Fornecedor / Destinatário</label>
+              <input type="text" id="expense-recipient" class="form-input" placeholder="Ex: Equatorial AL" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Forma de Pagamento</label>
+              <select id="expense-method" class="form-select">
+                <option value="PIX">PIX</option>
+                <option value="BOLETO">Boleto</option>
+                <option value="TRANSFERENCIA">Transferência</option>
+                <option value="DINHEIRO">Dinheiro</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Observações</label>
+            <input type="text" id="expense-notes" class="form-input" placeholder="Detalhes adicionais..." />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('new-expense-modal')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Despesa</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="storage.js"></script>
+  <script src="auth.js"></script>
+  <script src="theme.js"></script>
+  <script src="ui.js"></script>
+  <script src="navigation.js"></script>
+  <script src="expenses.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fitAuth.enforcePageAccess(["PROPRIETARIO", "ADMINISTRADOR"]);
+      setupNavigation("despesas", "Despesas");
+      initExpensesPage();
+      document.getElementById("expense-due-date").value = new Date().toISOString().slice(0, 10);
+    });
+  </script>
+</body>
+</html>

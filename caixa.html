@@ -1,0 +1,235 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Caixa Diário — FitControl</title>
+  <link rel="stylesheet" href="global.css" />
+  <link rel="stylesheet" href="layout.css" />
+  <link rel="stylesheet" href="components.css" />
+  <link rel="stylesheet" href="responsive.css" />
+</head>
+<body>
+  <div class="app-wrapper">
+    <aside class="sidebar"></aside>
+
+    <div class="main-wrapper">
+      <header class="topbar"></header>
+
+      <main class="main-content">
+        <div class="page-header">
+          <div class="page-header-row">
+            <div>
+              <div class="flex items-center gap-3">
+                <h1 class="page-title">Caixa Diário</h1>
+                <span id="cash-status-badge" class="badge badge-success">Caixa Aberto</span>
+              </div>
+              <p class="page-subtitle">Abertura, fechamento, conciliação física de cédulas e auditoria de sangrias</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" class="btn btn-primary" id="btn-open-cash" onclick="openModal('open-cash-modal')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7h10"/><path d="M12 7v10"/></svg>
+                Abrir Caixa
+              </button>
+              <button type="button" class="btn btn-danger" id="btn-close-cash" onclick="openCloseCashModal()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m9 12 2 2 4-4"/></svg>
+                Fechar Caixa (Conferência)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grade de Indicadores de Caixa -->
+        <div class="stats-grid">
+          <div class="stat-card stat-purple">
+            <div class="stat-content">
+              <span class="stat-label">Fundo Inicial</span>
+              <span class="stat-value" id="cash-initial-amount">R$ 0,00</span>
+              <span class="stat-helper">Aberto por: <strong id="cash-opened-by">-</strong></span>
+            </div>
+            <div class="stat-icon stat-icon-purple">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/></svg>
+            </div>
+          </div>
+
+          <div class="stat-card stat-green">
+            <div class="stat-content">
+              <span class="stat-label">Entradas & Suprimentos</span>
+              <span class="stat-value text-success" id="cash-total-inflows">R$ 0,00</span>
+              <span class="stat-helper text-success">Cédulas recebidas no turno</span>
+            </div>
+            <div class="stat-icon stat-icon-green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="16 12 12 8 8 12"/><line x1="12" y1="16" x2="12" y2="8"/></svg>
+            </div>
+          </div>
+
+          <div class="stat-card stat-red">
+            <div class="stat-content">
+              <span class="stat-label">Saídas & Sangrias</span>
+              <span class="stat-value text-danger" id="cash-total-outflows">R$ 0,00</span>
+              <span class="stat-helper text-muted">Retiradas e despesas em dinheiro</span>
+            </div>
+            <div class="stat-icon stat-icon-red">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="8 12 12 16 16 12"/><line x1="12" y1="8" x2="12" y2="16"/></svg>
+            </div>
+          </div>
+
+          <div class="stat-card stat-blue">
+            <div class="stat-content">
+              <span class="stat-label">Saldo em Caixa Esperado</span>
+              <span class="stat-value" id="cash-expected-balance">R$ 0,00</span>
+              <span class="stat-helper">Abertura: <span id="cash-opened-at">-</span></span>
+            </div>
+            <div class="stat-icon stat-icon-blue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botões de Sangria / Suprimento -->
+        <div class="card toolbar-card" style="margin-bottom: 1.5rem;">
+          <div class="flex items-center gap-3">
+            <button type="button" class="btn btn-outline" id="btn-sangria" onclick="openMovementModal('SANGRIA')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+              Realizar Sangria (Retirada)
+            </button>
+            <button type="button" class="btn btn-outline" id="btn-suprimento" onclick="openMovementModal('SUPRIMENTO')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+              Realizar Suprimento (Aporte)
+            </button>
+          </div>
+          <div class="text-xs text-muted">
+            Toda retirada ou suprimento exige identificação do operador para fins de auditoria.
+          </div>
+        </div>
+
+        <!-- Tabela de Movimentações -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Extrato de Movimentações do Turno</h3>
+          </div>
+          <div class="table-container" style="border: none;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Horário</th>
+                  <th>Tipo</th>
+                  <th>Justificativa / Descrição</th>
+                  <th>Valor</th>
+                  <th>Operador</th>
+                </tr>
+              </thead>
+              <tbody id="cash-movements-tbody">
+                <!-- Renderizado via cash.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Modal: Abertura de Caixa -->
+  <div id="open-cash-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Abrir Caixa Diário</h3>
+        <button class="modal-close-btn" onclick="closeModal('open-cash-modal')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <form onsubmit="handleOpenCashSubmit(event)">
+        <div class="modal-body">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Fundo de Troco Inicial (R$) <span class="required">*</span></label>
+            <input type="number" id="open-initial-amount" class="form-input" required step="0.50" value="150.00" />
+            <span class="form-helper">Valor presente fisicamente na gaveta no início do turno.</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('open-cash-modal')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Confirmar Abertura</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Fechamento de Caixa -->
+  <div id="close-cash-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Fechamento & Conferência Física</h3>
+        <button class="modal-close-btn" onclick="closeModal('close-cash-modal')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <form onsubmit="handleCloseCashSubmit(event)">
+        <div class="modal-body">
+          <div style="background: var(--bg-card-subtle); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between;">
+            <span>Saldo Esperado no Sistema:</span>
+            <strong id="close-expected-amount">R$ 0,00</strong>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Saldo Físico Contado na Gaveta (R$) <span class="required">*</span></label>
+            <input type="number" id="close-actual-amount" class="form-input" required step="0.50" />
+            <span class="form-helper">Informe a contagem física real de cédulas e moedas.</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Observações do Fechamento</label>
+            <textarea id="close-notes" class="form-textarea" placeholder="Descreva eventuais diferenças ou observações..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('close-cash-modal')">Cancelar</button>
+          <button type="submit" class="btn btn-danger">Confirmar Fechamento</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Sangria / Suprimento -->
+  <div id="cash-movement-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="movement-modal-title">Movimentação de Caixa</h3>
+        <button class="modal-close-btn" onclick="closeModal('cash-movement-modal')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <form onsubmit="handleMovementSubmit(event)">
+        <input type="hidden" id="movement-type" />
+        <div class="modal-body">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Valor da Movimentação (R$) <span class="required">*</span></label>
+            <input type="number" id="movement-amount" class="form-input" required step="0.50" placeholder="0.00" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Justificativa / Motivo <span class="required">*</span></label>
+            <input type="text" id="movement-desc" class="form-input" required placeholder="Ex: Pagamento de entrega de água mineral" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('cash-movement-modal')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Registrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="storage.js"></script>
+  <script src="auth.js"></script>
+  <script src="theme.js"></script>
+  <script src="ui.js"></script>
+  <script src="navigation.js"></script>
+  <script src="cash.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fitAuth.enforcePageAccess(["PROPRIETARIO", "ADMINISTRADOR", "RECEPCIONISTA"]);
+      setupNavigation("caixa", "Caixa Diário");
+      initCashPage();
+    });
+  </script>
+</body>
+</html>

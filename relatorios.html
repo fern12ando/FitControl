@@ -1,0 +1,134 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Relatórios — FitControl</title>
+  <link rel="stylesheet" href="global.css" />
+  <link rel="stylesheet" href="layout.css" />
+  <link rel="stylesheet" href="components.css" />
+  <link rel="stylesheet" href="responsive.css" />
+</head>
+<body>
+  <div class="app-wrapper">
+    <aside class="sidebar"></aside>
+
+    <div class="main-wrapper">
+      <header class="topbar"></header>
+
+      <main class="main-content">
+        <div class="page-header">
+          <div class="page-header-row">
+            <div>
+              <h1 class="page-title">Relatórios & Inteligência Gerencial</h1>
+              <p class="page-subtitle">Demonstrativos financeiros, DRE simplificado e exportação para Excel</p>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="exportOfficialExcelModel()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Exportar Planilha (Modelo Oficial)
+            </button>
+          </div>
+        </div>
+
+        <!-- KPIs Resumo Financeiro -->
+        <div class="stats-grid">
+          <div class="stat-card stat-green">
+            <div class="stat-content">
+              <span class="stat-label">Receita Bruta Acumulada</span>
+              <span class="stat-value text-success" id="rep-revenue">R$ 0,00</span>
+              <span class="stat-helper">Mensalidades recebidas</span>
+            </div>
+            <div class="stat-icon stat-icon-green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+            </div>
+          </div>
+
+          <div class="stat-card stat-red">
+            <div class="stat-content">
+              <span class="stat-label">Despesas Operacionais</span>
+              <span class="stat-value text-danger" id="rep-expenses">R$ 0,00</span>
+              <span class="stat-helper">Custos operacionais liquidados</span>
+            </div>
+            <div class="stat-icon stat-icon-red">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/></svg>
+            </div>
+          </div>
+
+          <div class="stat-card stat-blue">
+            <div class="stat-content">
+              <span class="stat-label">Resultado Líquido</span>
+              <span class="stat-value" id="rep-net-balance">R$ 0,00</span>
+              <span class="stat-helper">Saldo em caixa consolidado</span>
+            </div>
+            <div class="stat-icon stat-icon-blue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+          </div>
+
+          <div class="stat-card stat-purple">
+            <div class="stat-content">
+              <span class="stat-label">Base de Alunos Ativos</span>
+              <span class="stat-value" id="rep-active-students">0</span>
+              <span class="stat-helper">Matrículas com acesso liberado</span>
+            </div>
+            <div class="stat-icon stat-icon-purple">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grade: Formas de Pagamento e Detalhamento da Planilha -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+          <!-- Recebimentos por Meio de Pagamento -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Receita por Forma de Pagamento</h3>
+              <span class="card-subtitle">Preferência financeira dos clientes</span>
+            </div>
+            <div class="card-body" id="methods-breakdown-container">
+              <!-- Renderizado via reports.js -->
+            </div>
+          </div>
+
+          <!-- Informações sobre o Modelo Oficial da Planilha -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Modelo de Exportação Excel Oficial</h3>
+              <span class="badge badge-success">Compatibilidade Total</span>
+            </div>
+            <div class="card-body" style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6;">
+              <p style="margin-bottom: 0.75rem;">
+                O arquivo gerado segue rigorosamente o <strong>Modelo Oficial Avançado de Gestão de Academias</strong>:
+              </p>
+              <ul style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1.25rem;">
+                <li><strong>Separador Ponto-e-Vírgula (;):</strong> Cada coluna abre perfeitamente dividida no Microsoft Excel brasileiro.</li>
+                <li><strong>Formatação Decimal:</strong> Números no padrão nacional (ex: <code>R$ 1.224,00</code>).</li>
+                <li><strong>Blocos Integrados:</strong> Painel de Gestão (KPIs), Receitas por Método, Centros de Custo de Despesas e Lista Nominal de Alunos.</li>
+                <li><strong>Instruções de Uso:</strong> Seção de boas práticas incorporada na própria planilha.</li>
+              </ul>
+              <button type="button" class="btn btn-outline w-full" onclick="exportOfficialExcelModel()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Baixar Planilha Agora (.CSV / Excel)
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="storage.js"></script>
+  <script src="auth.js"></script>
+  <script src="theme.js"></script>
+  <script src="ui.js"></script>
+  <script src="navigation.js"></script>
+  <script src="reports.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fitAuth.enforcePageAccess(["PROPRIETARIO", "ADMINISTRADOR"]);
+      setupNavigation("relatorios", "Relatórios");
+      initReportsPage();
+    });
+  </script>
+</body>
+</html>

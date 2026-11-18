@@ -1,0 +1,116 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Planos & Assinaturas — FitControl</title>
+  <link rel="stylesheet" href="global.css" />
+  <link rel="stylesheet" href="layout.css" />
+  <link rel="stylesheet" href="components.css" />
+  <link rel="stylesheet" href="responsive.css" />
+</head>
+<body>
+  <div class="app-wrapper">
+    <aside class="sidebar"></aside>
+
+    <div class="main-wrapper">
+      <header class="topbar"></header>
+
+      <main class="main-content">
+        <div class="page-header">
+          <div class="page-header-row">
+            <div>
+              <h1 class="page-title">Planos & Assinaturas</h1>
+              <p class="page-subtitle">Configure durações, descontos progressivos e valores contratuais</p>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="openCreatePlanModal()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Criar Novo Plano
+            </button>
+          </div>
+        </div>
+
+        <!-- Grade de Cards de Planos -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="plans-grid-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+          <!-- Renderizado via plans.js -->
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Modal: Criar / Editar Plano -->
+  <div id="plan-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="plan-modal-title">Configurar Plano</h3>
+        <button class="modal-close-btn" onclick="closeModal('plan-modal')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <form id="plan-form" onsubmit="handleSavePlan(event)">
+        <input type="hidden" id="plan-id" />
+        <div class="modal-body">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Nome do Plano <span class="required">*</span></label>
+            <input type="text" id="plan-name" class="form-input" required placeholder="Ex: Plano Trimestral VIP" />
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Descrição dos Benefícios</label>
+            <input type="text" id="plan-description" class="form-input" placeholder="Ex: Musculação livre + avaliação física" />
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Duração (Meses) <span class="required">*</span></label>
+              <input type="number" id="plan-duration" class="form-input" required min="1" max="36" value="3" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Mensalidade Base (R$) <span class="required">*</span></label>
+              <input type="number" id="plan-monthly-price" class="form-input" required min="1" step="0.50" value="120" />
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+            <div class="form-group">
+              <label class="form-label">Desconto do Contrato (%)</label>
+              <input type="number" id="plan-discount" class="form-input" min="0" max="90" value="5" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Destaque / Tag Promocional</label>
+              <input type="text" id="plan-tag" class="form-input" placeholder="Ex: Mais Popular" />
+            </div>
+          </div>
+
+          <!-- Preview do Valor Calculado Automaticamente -->
+          <div style="background: var(--bg-card-subtle); border: 2px dashed var(--accent-primary); border-radius: var(--radius-md); padding: 1rem; text-align: center;">
+            <div class="text-xs text-muted uppercase font-bold">Valor Total Final do Contrato</div>
+            <div style="font-size: 1.85rem; font-weight: 800; color: var(--accent-primary); margin: 0.25rem 0;" id="preview-total-price">
+              R$ 0,00
+            </div>
+            <div class="text-xs text-success" id="preview-discount-val">Desconto aplicado: R$ 0,00</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('plan-modal')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Plano</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="storage.js"></script>
+  <script src="auth.js"></script>
+  <script src="theme.js"></script>
+  <script src="ui.js"></script>
+  <script src="navigation.js"></script>
+  <script src="plans.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fitAuth.enforcePageAccess(["PROPRIETARIO", "ADMINISTRADOR", "RECEPCIONISTA", "CONSULTA"]);
+      setupNavigation("planos", "Planos & Assinaturas");
+      initPlansPage();
+    });
+  </script>
+</body>
+</html>

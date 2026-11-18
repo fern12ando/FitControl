@@ -1,0 +1,184 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pagamentos — FitControl</title>
+  <link rel="stylesheet" href="global.css" />
+  <link rel="stylesheet" href="layout.css" />
+  <link rel="stylesheet" href="components.css" />
+  <link rel="stylesheet" href="responsive.css" />
+</head>
+<body>
+  <div class="app-wrapper">
+    <aside class="sidebar"></aside>
+
+    <div class="main-wrapper">
+      <header class="topbar"></header>
+
+      <main class="main-content">
+        <div class="page-header">
+          <div class="page-header-row">
+            <div>
+              <h1 class="page-title">Controle de Pagamentos</h1>
+              <p class="page-subtitle">Recebimentos, baixas manuais, comprovantes e conciliação financeira</p>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="openModal('new-payment-modal')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Lançar Recebimento
+            </button>
+          </div>
+        </div>
+
+        <!-- Toolbar de Filtros -->
+        <div class="card toolbar-card">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" id="payment-search-input" class="form-input" placeholder="Buscar por aluno, plano ou observações..." />
+          </div>
+
+          <div class="filter-actions">
+            <select id="payment-status-filter" class="form-select" style="min-width: 140px;">
+              <option value="TODOS">Todos os Status</option>
+              <option value="PAGO">Somente Pagos</option>
+              <option value="PENDENTE">Pendentes</option>
+              <option value="ATRASADO">Atrasados</option>
+            </select>
+
+            <select id="payment-method-filter" class="form-select" style="min-width: 140px;">
+              <option value="TODOS">Todos os Métodos</option>
+              <option value="PIX">PIX</option>
+              <option value="DINHEIRO">Dinheiro</option>
+              <option value="CARTAO_CREDITO">Cartão de Crédito</option>
+              <option value="CARTAO_DEBITO">Cartão de Débito</option>
+              <option value="BOLETO">Boleto</option>
+            </select>
+
+            <span class="badge badge-purple" id="payments-count-badge">0 registro(s)</span>
+          </div>
+        </div>
+
+        <!-- Tabela de Pagamentos -->
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Aluno / Referência</th>
+                <th>Vencimento</th>
+                <th>Data Pagamento</th>
+                <th>Método</th>
+                <th>Valor Líquido</th>
+                <th>Status</th>
+                <th class="text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="payments-table-body">
+              <!-- Renderizado via payments.js -->
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Modal: Novo Pagamento -->
+  <div id="new-payment-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Registrar Pagamento</h3>
+        <button class="modal-close-btn" onclick="closeModal('new-payment-modal')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <form id="new-payment-form" onsubmit="handleCreatePayment(event)">
+        <div class="modal-body">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Aluno Correspondente <span class="required">*</span></label>
+            <select id="new-pay-student" class="form-select" required></select>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Valor Bruto (R$) <span class="required">*</span></label>
+              <input type="number" id="new-pay-amount" class="form-input" required step="0.50" value="130" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Desconto Pontual (R$)</label>
+              <input type="number" id="new-pay-discount" class="form-input" min="0" step="0.50" value="0" />
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Forma de Pagamento <span class="required">*</span></label>
+              <select id="new-pay-method" class="form-select" required>
+                <option value="PIX">PIX Instantâneo</option>
+                <option value="DINHEIRO">Dinheiro (Caixa)</option>
+                <option value="CARTAO_CREDITO">Cartão de Crédito</option>
+                <option value="CARTAO_DEBITO">Cartão de Débito</option>
+                <option value="BOLETO">Boleto Bancário</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Status Inicial</label>
+              <select id="new-pay-status" class="form-select">
+                <option value="PAGO">Pago (Dar Baixa Agora)</option>
+                <option value="PENDENTE">Pendente</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Data de Vencimento</label>
+            <input type="date" id="new-pay-date" class="form-input" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Observações / Anotações</label>
+            <input type="text" id="new-pay-notes" class="form-input" placeholder="Ex: Mensalidade avulsa..." />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('new-payment-modal')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Registrar Pagamento</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Recibo Imprimível -->
+  <div id="receipt-modal" class="modal-overlay">
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">Comprovante de Pagamento</h3>
+        <button class="modal-close-btn" onclick="closeModal('receipt-modal')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" id="receipt-modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('receipt-modal')">Fechar</button>
+        <button type="button" class="btn btn-primary" onclick="executePrintReceipt()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+          Imprimir Comprovante
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="storage.js"></script>
+  <script src="auth.js"></script>
+  <script src="theme.js"></script>
+  <script src="ui.js"></script>
+  <script src="navigation.js"></script>
+  <script src="payments.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fitAuth.enforcePageAccess(["PROPRIETARIO", "ADMINISTRADOR", "RECEPCIONISTA", "CONSULTA"]);
+      setupNavigation("pagamentos", "Pagamentos");
+      initPaymentsPage();
+      document.getElementById("new-pay-date").value = new Date().toISOString().slice(0, 10);
+    });
+  </script>
+</body>
+</html>
